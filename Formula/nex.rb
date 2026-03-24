@@ -1,22 +1,24 @@
 class Nex < Formula
   desc "Organizational context & memory for AI agents via MCP"
   homepage "https://nex.ai"
-  url "https://github.com/nex-crm/nex-as-a-skill/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "PLACEHOLDER_SHA256_UPDATE_AFTER_RELEASE"
+  url "https://registry.npmjs.org/@nex-ai/nex/-/nex-0.1.52.tgz"
+  sha256 "9dc458b845f9db3fff8c4b58a6325fa9742808e4c65d6cc50e00094748ff40aa"
   license "MIT"
+
+  livecheck do
+    url "https://registry.npmjs.org/@nex-ai/nex/latest"
+    regex(/"version":\s*"([^"]+)"/i)
+  end
 
   depends_on "node@20"
 
   def install
-    cd "cli" do
-      system "npm", "install", *std_npm_args
-      system "npm", "run", "build"
-    end
-
+    system "npm", "install", *std_npm_args
     bin.install_symlink Dir[libexec/"bin/*"]
   end
 
   test do
-    assert_match "nex", shell_output("#{bin}/nex --version")
+    output = shell_output("#{bin}/nex --help 2>&1", 0)
+    assert_match "nex", output
   end
   end
