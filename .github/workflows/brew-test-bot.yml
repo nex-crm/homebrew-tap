@@ -1,0 +1,57 @@
+name: brew test-bot
+
+# Homebrew tap CI: lints + audits every formula on PR, and runs a real
+# `brew install` + `brew test` on macOS to catch download/install/test
+# regressions before they reach `brew install nex-crm/tap/nex` users.
+#
+# `brew test-bot --only-tap-syntax` is the canonical Homebrew tap CI
+# entry point — it runs `brew style` + `brew audit --strict --online`
+# against the tap (https://docs.brew.sh/Homebrew-and-Python is one of
+# many official taps that uses the same shape).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: brew-test-bot-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-bot-syntax:
+    name: tap syntax (style + audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Homebrew/actions has no tagged releases — pin to master SHA.
+      - uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master
+        with:
+          test-bot: true
+
+      - name: brew test-bot --only-tap-syntax
+        run: brew test-bot --only-tap-syntax
+
+  install-test:
+    name: install + test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master
+
+      - name: brew install --build-from-source
+        run: brew install --build-from-source --verbose ./Formula/nex.rb
+
+      - name: brew test
+        run: brew test ./Formula/nex.rb

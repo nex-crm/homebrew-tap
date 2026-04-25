@@ -1,0 +1,12 @@
+{
+  "name": "@nex-crm/homebrew-tap",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Build-time tooling for the Nex Homebrew tap (secretlint config). Not part of the published Homebrew formula.",
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@secretlint/secretlint-rule-preset-recommend": "^12.2.0",
+    "secretlint": "^12.2.0"
+  }
+}

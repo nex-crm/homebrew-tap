@@ -18,7 +18,7 @@ class Nex < Formula
   end
 
   test do
-    output = shell_output("#{bin}/nex --help 2>&1", 0)
+    output = shell_output("#{bin}/nex --help 2>&1")
     assert_match "nex", output
   end
-  end
+end
