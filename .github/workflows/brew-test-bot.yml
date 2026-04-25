@@ -1,0 +1,82 @@
+name: brew test-bot
+
+# Homebrew tap CI: lints + audits every formula on PR, and runs a real
+# `brew install` + `brew test` on macOS to catch download/install/test
+# regressions before they reach `brew install nex-crm/tap/nex` users.
+#
+# `brew test-bot --only-tap-syntax` is the canonical Homebrew tap CI
+# entry point — it runs `brew style` + `brew audit --strict --online`
+# against the tap (https://docs.brew.sh/Homebrew-and-Python is one of
+# many official taps that uses the same shape).
+#
+# `Homebrew/actions/setup-homebrew` is pinned to a master commit
+# because the action repo has no tagged releases (`gh api
+# repos/Homebrew/actions/tags` is empty). Refresh quarterly, or when
+# the action's main.sh symlink behavior changes — see
+# https://github.com/Homebrew/actions/blob/main/setup-homebrew/main.sh.
+# Dependabot can't ratchet a master pin; bump by hand.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: brew-test-bot-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Single source of truth for the setup-homebrew pin so style and
+  # install jobs can never drift out of sync.
+  SETUP_HOMEBREW_SHA: f1cc9df7a62b7f6244414d21a3ebc3ba9156a082
+
+jobs:
+  test-bot-syntax:
+    name: tap syntax (style + audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # fetch-depth: 1 default — brew style/audit operate on the
+      # working tree only; no git-history dependency.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: setup-homebrew
+        # Action ref must be a literal — can't interpolate ${{ env.* }}
+        # into `uses:`. The SETUP_HOMEBREW_SHA env var documents that
+        # both setup-homebrew steps SHOULD be the same SHA; keep them
+        # in lockstep when bumping.
+        uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master — see SETUP_HOMEBREW_SHA
+
+      - name: brew test-bot --only-tap-syntax
+        run: brew test-bot --only-tap-syntax
+
+  install-test:
+    name: install + test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      # fetch-depth: 1 default — brew install/test operate on the
+      # working tree only.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # When the repo name matches `homebrew-<tap>` (here:
+      # nex-crm/homebrew-tap), `Homebrew/actions/setup-homebrew`
+      # auto-mounts $GITHUB_WORKSPACE at
+      # $(brew --repository <owner>/<tap>) so the PR's formula is
+      # immediately resolvable as `nex-crm/tap/nex`. Documented in
+      # the action's main.sh:94-95,263-273.
+      - name: setup-homebrew
+        uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master — see SETUP_HOMEBREW_SHA
+
+      - name: brew install --build-from-source
+        run: brew install --build-from-source --verbose nex-crm/tap/nex
+
+      - name: brew test
+        run: brew test nex-crm/tap/nex

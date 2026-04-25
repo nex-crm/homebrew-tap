@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Root: dev-only tooling (secretlint, commitlint). Used by
+  # secret-scan.yml + commitlint.yml workflows; not part of the
+  # published Homebrew formula.
+  #
+  # Why `npm` (not `bun`): bun-managed locally via bun.lock, but
+  # dependabot has no bun ecosystem — it reads package.json directly
+  # under the npm ecosystem. Without this entry, secretlint /
+  # commitlint bumps land manually only.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    groups:
+      all-dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore"
+      include: "scope"

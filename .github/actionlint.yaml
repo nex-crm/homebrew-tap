@@ -1,0 +1,9 @@
+# actionlint config for this tap.
+# Required because `brew style` runs actionlint against
+# `.github/workflows/*.yml`, and otherwise picks up Homebrew's own
+# `actionlint.yaml` (which only allows `BREW_COMMIT_APP_ID`).
+self-hosted-runner:
+  labels: []
+# Configuration variables (`vars.X`) used by workflows in this repo.
+config-variables:
+  - APPROVER_APP_ID
