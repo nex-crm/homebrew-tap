@@ -1,8 +1,21 @@
+# PINNED at 0.1.52 — DO NOT auto-bump until the bootstrap-shim
+# decision lands.
+#
+# As of @nex-ai/nex 0.2.x, the npm package no longer ships the CLI;
+# it ships a bootstrap shim that prints "nex-cli binary not found.
+# Install it with: curl -fsSL .../install.sh | sh" and exits non-zero.
+# `brew install nex-crm/tap/nex` → 0.2.x would deliver a broken
+# executable to every user. 0.1.52 is the last functional CLI on npm.
+#
+# The companion `livecheck-drift.yml` workflow will fire daily as a
+# canary while this pin holds. Either retarget the formula at
+# nex-as-a-skill's binary releases or deprecate the formula; do not
+# silently bump the npm tarball.
 class Nex < Formula
   desc "Organizational context & memory for AI agents via MCP"
   homepage "https://nex.ai"
-  url "https://registry.npmjs.org/@nex-ai/nex/-/nex-0.2.12.tgz"
-  sha256 "9fc946b0ace3112e31715ffc204ab9c0fc82de3767051cb9c94b71d37f323c23"
+  url "https://registry.npmjs.org/@nex-ai/nex/-/nex-0.1.52.tgz"
+  sha256 "9dc458b845f9db3fff8c4b58a6325fa9742808e4c65d6cc50e00094748ff40aa"
   license "MIT"
 
   livecheck do
@@ -18,17 +31,7 @@ class Nex < Formula
   end
 
   test do
-    # `--version` is the only non-interactive entry point as of
-    # @nex-ai/nex 0.2.x — `--help` launches a TUI that hangs `brew
-    # test`'s no-TTY sandbox until Homebrew kills it.
-    #
-    # The exit code is unreliable (0 on developer machines, 1 on
-    # GitHub-hosted macos-14/15 runners, with the same binary). Use
-    # IO.popen to capture output without asserting an exit code, and
-    # match a semver shape — the embedded version string is currently
-    # independent of the npm package version (a separate nex-cli
-    # bug, out of scope).
-    output = IO.popen([bin/"nex", "--version", err: [:child, :out]], &:read)
-    assert_match(/\d+\.\d+\.\d+/, output)
+    output = shell_output("#{bin}/nex --help 2>&1")
+    assert_match "nex", output
   end
 end

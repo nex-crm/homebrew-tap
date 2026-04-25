@@ -19,10 +19,11 @@ on:
     # GitHub-cron stampede.
     - cron: "17 14 * * *"
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "Formula/**"
-      - ".github/workflows/livecheck-drift.yml"
+  # Intentionally NOT running on pull_request: the workflow would fail
+  # any PR while the formula is shipping a known-stale 0.1.52 (see
+  # `Formula/nex.rb` header comment). Re-add `pull_request: paths:
+  # Formula/**` once the bootstrap-shim distribution decision lands
+  # and the tap is back in steady-state with the upstream npm version.
 
 permissions:
   contents: read
