@@ -1,0 +1,80 @@
+name: livecheck drift
+
+# Self-healing fallback for the cross-repo dispatch from
+# nex-as-a-skill/homebrew-update.yml. Runs `brew livecheck --json`
+# against every formula in this tap; fails the job (and pings the
+# repo via an issue) if any formula's `current` ≠ `latest`.
+#
+# Why: the upstream `dawidd6/action-homebrew-bump-formula` flow lives
+# in nex-crm/nex-as-a-skill and has failed silently before (empty
+# HOMEBREW_TAP_TOKEN, 2026-03-31). This workflow detects that drift
+# without depending on the upstream automation.
+#
+# `workflow_dispatch` lets a maintainer poll on demand; the cron is
+# the safety net for when nobody remembers.
+
+on:
+  schedule:
+    # 14:17 UTC daily — off-hour, off-minute to avoid the 0/15/30/45
+    # GitHub-cron stampede.
+    - cron: "17 14 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "Formula/**"
+      - ".github/workflows/livecheck-drift.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: livecheck-drift-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  livecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Auto-mounts $GITHUB_WORKSPACE at $(brew --repository nex-crm/tap)
+      # so livecheck resolves formulae from this PR's tree, not main.
+      - uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master
+
+      - name: brew livecheck --json (all formulae)
+        id: livecheck
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # `--full-name` ensures the `formula` key is `nex-crm/tap/nex`
+          # rather than the bare `nex`, so issue bodies are unambiguous
+          # if the tap ever ships multiple formulae.
+          brew livecheck --json --full-name --tap=nex-crm/tap > /tmp/livecheck.json
+          cat /tmp/livecheck.json
+
+          # Outdated formulae have `version.outdated: true` AND
+          # `version.newer_than_upstream: false`. The latter guards
+          # against a state where the formula is *ahead* of upstream
+          # (e.g., a manual revision bump) — that is not drift.
+          drift=$(jq -c '[.[] | select(.version.outdated == true and .version.newer_than_upstream == false)]' /tmp/livecheck.json)
+          drift_count=$(echo "$drift" | jq 'length')
+          {
+            echo "drift_count=${drift_count}"
+            echo "drift_json<<EOF"
+            echo "$drift"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Fail if drift detected
+        if: steps.livecheck.outputs.drift_count != '0'
+        env:
+          DRIFT_JSON: ${{ steps.livecheck.outputs.drift_json }}
+        run: |
+          echo "::error::Tap drift detected — $(echo "$DRIFT_JSON" | jq 'length') formula(e) outdated."
+          echo "$DRIFT_JSON" | jq -r '.[] | "  - \(.formula): \(.version.current) → \(.version.latest)"'
+          exit 1
