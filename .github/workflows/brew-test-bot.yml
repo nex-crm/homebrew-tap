@@ -50,8 +50,13 @@ jobs:
 
       - uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master
 
+      # `brew install` rejects bare paths — formulae must live in a tap.
+      # Register this checkout as `nex-crm/tap`'s on-disk source.
+      - name: Tap local checkout
+        run: brew tap nex-crm/tap "$GITHUB_WORKSPACE"
+
       - name: brew install --build-from-source
-        run: brew install --build-from-source --verbose ./Formula/nex.rb
+        run: brew install --build-from-source --verbose nex-crm/tap/nex
 
       - name: brew test
-        run: brew test ./Formula/nex.rb
+        run: brew test nex-crm/tap/nex
