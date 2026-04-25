@@ -46,19 +46,13 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      # When the repo name matches `homebrew-<tap>` (here:
+      # nex-crm/homebrew-tap), `Homebrew/actions/setup-homebrew`
+      # auto-mounts $GITHUB_WORKSPACE at
+      # $(brew --repository <owner>/<tap>) so the PR's formula is
+      # immediately resolvable as `nex-crm/tap/nex`. No explicit
+      # `brew tap` call needed.
       - uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master
-
-      # `brew install --build-from-source ./Formula/nex.rb` rejects bare
-      # paths ("formulae must live in a tap"). And `brew tap nex-crm/tap
-      # $GITHUB_WORKSPACE` rejects the local path because the tap name
-      # already maps to the published GitHub remote ("Tap remote
-      # mismatch"). Workaround: tap the canonical remote, then overlay
-      # this PR's formula on top before install/test.
-      - name: Stage PR formula in canonical tap location
-        run: |
-          set -euo pipefail
-          brew tap nex-crm/tap
-          cp -f "$GITHUB_WORKSPACE/Formula/nex.rb" "$(brew --repository nex-crm/tap)/Formula/nex.rb"
 
       - name: brew install --build-from-source
         run: brew install --build-from-source --verbose nex-crm/tap/nex
