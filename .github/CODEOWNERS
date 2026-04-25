@@ -1,8 +1,11 @@
-# Advisory only — NOT enforced by branch protection.
+# Wildcard `*` rule below is advisory — branch protection for non-Formula
+# paths has `require_code_owner_reviews: false`. GitHub uses it solely
+# to auto-request review on new PRs.
 #
-# classic branch protection on `main` has `require_code_owner_reviews: false`,
-# so this file does not gate merges. GitHub uses it solely to auto-request
-# review on new PRs. If you need enforcement, enable the rule on branch
-# protection explicitly.
+# `Formula/**` is the trust boundary that ships to `brew install` users.
+# Branch protection MUST scope `require_code_owner_reviews: true` to
+# `Formula/**` (or repo-wide). Any change to a formula `url` / `sha256`
+# / `livecheck` block reaches user machines on the next `brew upgrade`.
 
 * @FranDias @dolliver
+Formula/** @FranDias @dolliver

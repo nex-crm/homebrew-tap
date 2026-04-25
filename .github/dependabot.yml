@@ -17,6 +17,11 @@ updates:
   # Root: dev-only tooling (secretlint, commitlint). Used by
   # secret-scan.yml + commitlint.yml workflows; not part of the
   # published Homebrew formula.
+  #
+  # Why `npm` (not `bun`): bun-managed locally via bun.lock, but
+  # dependabot has no bun ecosystem — it reads package.json directly
+  # under the npm ecosystem. Without this entry, secretlint /
+  # commitlint bumps land manually only.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
