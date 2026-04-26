@@ -7,5 +7,5 @@
 # `Formula/**` (or repo-wide). Any change to a formula `url` / `sha256`
 # / `livecheck` block reaches user machines on the next `brew upgrade`.
 
-* @FranDias @dolliver
-Formula/** @FranDias @dolliver
+* @FranDias @nex-crm/backend
+Formula/** @FranDias @nex-crm/backend
