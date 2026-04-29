@@ -18,27 +18,27 @@
 class Nex < Formula
   desc "Organizational context & memory for AI agents via MCP"
   homepage "https://nex.ai"
-  version "0.1.9"
+  version "0.1.10"
   license "MIT"
 
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.9/nex-cli-darwin-arm64"
-    sha256 "d87c750a2a449d56c6b7147b7f35ad3fa98622800fdaa5558b9f8a53f9156958"
+    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.10/nex-cli-darwin-arm64"
+    sha256 "4d1563ce16aea8a639eee20dcc149287b1617e207458d2c11b54b815ce3d1ae6"
   end
 
   if OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.9/nex-cli-darwin-x64"
-    sha256 "99d03726a6df411a5172b6c0e680e2516bc11c1bca1c713c68d43d27f845181c"
+    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.10/nex-cli-darwin-x64"
+    sha256 "5eabacd50227aa419956b7635c8e8fd54a2323d422f96b4b935f2b94af443720"
   end
 
   if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.9/nex-cli-linux-arm64"
-    sha256 "f45d06d08b26959d0c184f0f080e53b3a7144db66f85421b19b1a4e0a60b0c5d"
+    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.10/nex-cli-linux-arm64"
+    sha256 "f67fa71776d63c6d6e004d7b5b832462c8cec33624abaa97ccce70392abf1d36"
   end
 
   if OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.9/nex-cli-linux-x64"
-    sha256 "4adf1d3b48dfaedff152fb62e8601d91558174e06b5c004042302cecdf09db17"
+    url "https://github.com/nex-crm/nex-as-a-skill/releases/download/v0.1.10/nex-cli-linux-x64"
+    sha256 "96a9be345b9ef78c1bb79bd7d1d9e69b15fef2d7aaa43b544bd96098891a2adf"
   end
 
   livecheck do
