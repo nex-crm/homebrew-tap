@@ -15,6 +15,9 @@ on:
     - cron: '0 9 * * 1'  # Monday 09:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   check:
     # NOTE: 98294031… is the COMMIT sha v0.6.2 dereferences to. The
@@ -22,4 +25,4 @@ jobs:
     # Actions cannot resolve `uses: …@<tag-object-sha>`, the workflow
     # silently fails validation with conclusion=failure and zero jobs.
     # Verified with: gh api repos/nex-crm/.github/git/tags/<tag-obj-sha> --jq .object.sha
-    uses: nex-crm/.github/.github/workflows/docs-link-check.yml@98294031b84bf07f8bdf227940225ba21e9d2678 # v0.6.2
+    uses: nex-crm/.github/.github/workflows/docs-link-check.yml@013ffe217177936fc5c562f6930ecab44795c406 # ratchet:nex-crm/.github/.github/workflows/docs-link-check.yml@v2
