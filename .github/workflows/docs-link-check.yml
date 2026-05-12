@@ -25,4 +25,4 @@ jobs:
     # Actions cannot resolve `uses: …@<tag-object-sha>`, the workflow
     # silently fails validation with conclusion=failure and zero jobs.
     # Verified with: gh api repos/nex-crm/.github/git/tags/<tag-obj-sha> --jq .object.sha
-    uses: nex-crm/.github/.github/workflows/docs-link-check.yml@ef2321b9cd3a83561a6a4bca70df635d58766cb0 # ratchet:nex-crm/.github/.github/workflows/docs-link-check.yml@v2
+    uses: nex-crm/.github/.github/workflows/docs-link-check.yml@f34cc861ed2f735d474ef47dd396cb3aab591d7b # ratchet:nex-crm/.github/.github/workflows/docs-link-check.yml@v2
