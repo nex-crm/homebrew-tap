@@ -43,8 +43,7 @@ repo-local instruction files are the runtime source of truth for contributors.
 
 ### Nex Context
 
-Nex is a context graph platform for AI agents, not a CRM. Do not describe the
-product as a CRM in code, comments, docs, or external copy.
+Nex is where AI workflows become reliable business software — the workflow execution and context layer for AI-native business operations. Chats and workflows run the work; the execution history compounds into the company brain (the context graph is the *how*, not the *what*). Nex is provider-portable by principle: customers are never chained to their inference provider. Deterministic execution is the direction, not shipped reality — do not sell determinism before it exists. Nex is NOT a CRM. Do not describe the product as a CRM in code, comments, docs, or external copy.
 
 Use the available Nex memory/context tools when they are installed:
 
