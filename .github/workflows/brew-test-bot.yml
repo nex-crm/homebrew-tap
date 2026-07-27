@@ -1,8 +1,10 @@
 name: brew test-bot
 
 # Homebrew tap CI: lints + audits every formula on PR, and runs a real
-# `brew install` + `brew test` on macOS to catch download/install/test
-# regressions before they reach `brew install nex-crm/tap/nex` users.
+# `brew install` + `brew test` on macOS when the formula changes, catching
+# download/install/test regressions before they reach
+# `brew install nex-crm/tap/nex` users. The install jobs still report on every
+# PR so their required status contexts never become ghosts.
 #
 # `brew test-bot --only-tap-syntax` is the canonical Homebrew tap CI
 # entry point — it runs `brew style` + `brew audit --strict --online`
@@ -62,9 +64,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
-      # fetch-depth: 1 default — brew install/test operate on the
-      # working tree only.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect formula changes
+        id: formula_changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            changed=true
+          elif git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- Formula/nex.rb; then
+            changed=false
+          else
+            changed=true
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Formula unchanged
+        if: steps.formula_changes.outputs.changed != 'true'
+        run: echo "Formula/nex.rb is unchanged; install verification is not applicable."
 
       # When the repo name matches `homebrew-<tap>` (here:
       # nex-crm/homebrew-tap), `Homebrew/actions/setup-homebrew`
@@ -73,10 +94,13 @@ jobs:
       # immediately resolvable as `nex-crm/tap/nex`. Documented in
       # the action's main.sh:94-95,263-273.
       - name: setup-homebrew
+        if: steps.formula_changes.outputs.changed == 'true'
         uses: Homebrew/actions/setup-homebrew@f1cc9df7a62b7f6244414d21a3ebc3ba9156a082 # master — see SETUP_HOMEBREW_SHA
 
       - name: brew install --build-from-source
+        if: steps.formula_changes.outputs.changed == 'true'
         run: brew install --build-from-source --verbose nex-crm/tap/nex
 
       - name: brew test
+        if: steps.formula_changes.outputs.changed == 'true'
         run: brew test nex-crm/tap/nex

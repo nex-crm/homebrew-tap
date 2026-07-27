@@ -30,6 +30,12 @@ repo-local instruction files are the runtime source of truth for contributors.
 - Use Conventional Commits for commit messages.
 - Run the repo's documented checks before opening or marking a PR ready.
 - Do not use `--no-verify` to bypass hooks.
+- Required checks on `main` are mirrored in `nex-crm/.github` at
+  `branch-protection/required-status-checks.json`. If a PR adds, removes, or
+  renames a required CI status, open and link a companion `.github` PR updating
+  the homebrew-tap entry, and coordinate the live classic branch-protection
+  change before merging the workflow change. A stale required context blocks
+  later PRs.
 
 ### Quality Bar
 
